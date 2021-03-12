@@ -6,20 +6,32 @@ Created on Mon Mar  8 14:36:31 2021
 """
 
 import socket
-
+import threading
 
 client = socket.socket()
 host = 'localhost'
 port = 2222
 
-client.connect((host,port))
-print(client.recv(1024).decode())
 
-while True:
-    string = input()
-    client.send(string.encode())
-    buf = client.recv(1024).decode() #接受服务器发送的接收到的指令
-    print(buf)
-    if string == 'q': 
-        break
-client.close()
+def write_msg():
+    while True:
+        string = input()
+        client.send(string.encode())
+
+
+def read_msg():
+    while True:
+        buf =  client.recv(1024)
+        print(buf.decode())
+    
+client.connect((host,port))
+
+t1 = threading.Thread(target = write_msg)
+t2 = threading.Thread(target = read_msg)
+
+try:
+    t1.start()
+    t2.start()
+except:
+    client.close()
+
